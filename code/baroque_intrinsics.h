@@ -1,7 +1,7 @@
 #ifndef __BAROQUE_INTRINSICS_H_
 #define __BAROQUE_INTRINSICS_H_
 
-#include "math.h"
+#include <math.h>
 // TODO - convert these to platform-efficient versions and remove math.h
 
 inline int32 RoundReal32ToInt32(real32 Value)
