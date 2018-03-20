@@ -22,13 +22,10 @@ struct tile_map
     uint32 ChunkDim;
 
     real32 TileSideInMeters;
-    int32 TileSideInPixels;
-    real32 MetersToPixels;
-
-	// TODO - sparseness
 
 	uint32 TileChunkCountX;
 	uint32 TileChunkCountY;
+    uint32 TileChunkCountZ;
 	tile_chunk* TileChunks;
 };
 
