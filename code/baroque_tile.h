@@ -5,6 +5,7 @@ struct tile_chunk_position
 {
     uint32 TileChunkX;
     uint32 TileChunkY;
+    uint32 TileChunkZ;
 
     uint32 RelTileX;
     uint32 RelTileY;
@@ -35,6 +36,7 @@ struct tile_map_position
     // high bits are the tile chunk index and the low bits are the tile index in the chunk
     uint32 AbsTileX;
     uint32 AbsTileY;
+    uint32 AbsTileZ;
 
     // TODO - should these be from the center of the tile?
     // TODO - rename to Offset X and Y

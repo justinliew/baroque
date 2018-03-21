@@ -308,7 +308,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         TileMap->TileChunkCountY = 128;
         TileMap->TileChunkCountZ = 2;
 
-        TileMap->TileChunks = PushArray(&GameState->WorldArena, TileMap->TileChunkCountX*TileMap->TileChunkCountY, tile_chunk);
+        TileMap->TileChunks = PushArray(&GameState->WorldArena, TileMap->TileChunkCountX * TileMap->TileChunkCountY * TileMap->TileChunkCountZ, tile_chunk);
         TileMap->TileSideInMeters = 1.4f;
 
         // tile_chunk TileMapTileChunk;
@@ -319,24 +319,46 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         uint32 TilesPerHeight = 9;
         uint32 ScreenX = 0;
         uint32 ScreenY = 0;
+        uint32 AbsTileZ = 0;
 		uint32 RandomNumberIndex = 0;
 
         bool32 DoorLeft = false;
         bool32 DoorRight = false;
         bool32 DoorTop = false;
         bool32 DoorBottom = false;
+        bool32 DoorUp = false;
+        bool32 DoorDown = false;
 
         for (uint32 ScreenIndex = 0; ScreenIndex < 100; ++ScreenIndex)
         {
             // TODO - proper random number generator
             Assert(RandomNumberIndex < ArrayCount(RandomNumberTable));
-            uint32 RandomChoice = RandomNumberTable[RandomNumberIndex++] % 2;
+            uint32 RandomChoice;
+            if (DoorUp || DoorDown)
+            {
+                RandomChoice = RandomNumberTable[RandomNumberIndex++] % 2;
+            }
+            else
+            {
+                RandomChoice = RandomNumberTable[RandomNumberIndex++] % 3;
+            }
 
-            if (RandomChoice == 0)
+            if (RandomChoice == 2)
+            {
+                if (AbsTileZ == 0)
+                {
+                    DoorUp = true;
+                }
+                else
+                {
+                    DoorDown = true;
+                }
+            }
+            else if (RandomChoice == 1)
             {
                 DoorRight = true;
             }
-            if (RandomChoice == 1)
+            else
             {
                 DoorTop = true;
             }
@@ -367,9 +389,20 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
                         TileValue = 2;
                     }
 
+                    if (TileX == 10 && TileY == 6)
+                    {
+                        if (DoorUp)
+                        {
+                            TileValue = 3;
+                        }
+                        if (DoorDown)
+                        {
+                            TileValue = 4;
+                        }
+                    }
 
 
-                    SetTileValue(&GameState->WorldArena, World->TileMap, AbsTileX, AbsTileY, TileValue);
+                    SetTileValue(&GameState->WorldArena, World->TileMap, AbsTileX, AbsTileY, AbsTileZ, TileValue);
                     //SetTileValue(&GameState->WorldArena, World->TileMap, AbsTileX, AbsTileY, (TileX == TileY) && (TileY % 2) ? 1 : 0);
                 }
             }
@@ -379,7 +412,34 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             DoorRight = false;
             DoorTop = false;
 
-            if (RandomChoice == 0)
+            if (DoorUp)
+            {
+                DoorDown = true;
+                DoorUp = false;
+            }
+            else if (DoorDown)
+            {
+                DoorUp = true;
+                DoorDown = false;
+            }
+            else
+            {
+                DoorUp = false;
+                DoorDown = false;
+            }
+
+            if (RandomChoice == 2)
+            {
+                if (AbsTileZ == 0)
+                {
+                    AbsTileZ = 1;
+                }
+                else
+                {
+                    AbsTileZ = 0;
+                }
+            }
+            else if (RandomChoice == 1)
             {
                 ScreenX += 1;
             }
@@ -478,13 +538,18 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         {
             int32 Column = GameState->PlayerP.AbsTileX + RelColumn;
             int32 Row = GameState->PlayerP.AbsTileY + RelRow;
-            uint32  TileID = GetTileValue(TileMap, Column, Row);
+            uint32  TileID = GetTileValue(TileMap, Column, Row, GameState->PlayerP.AbsTileZ);
             if (TileID > 0)
             {
                 real32 Gray = 0.5f;
                 if (TileID == 2)
                 {
                     Gray = 1.f;
+                }
+
+                if (TileID > 2)
+                {
+                    Gray = 0.25f;
                 }
 
                 if (Row == (int32)GameState->PlayerP.AbsTileY && Column == (int32)GameState->PlayerP.AbsTileX)
