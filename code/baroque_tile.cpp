@@ -1,5 +1,6 @@
 #include "baroque_tile.h"
 
+//// TODO Do these belong somewhere else?
 inline void RecanonicalizeCoord(tile_map* TileMap, uint32* Tile, real32* TileRel)
 {
     // TODO - need to do something that doesn't use the divide/multiply method because we can end up rounding back
@@ -25,6 +26,7 @@ RecanonicalizePosition(tile_map* TileMap, tile_map_position Pos)
     RecanonicalizeCoord(TileMap, &Result.AbsTileY, &Result.TileRelY);
     return Result;
 }
+//// TODO Do these belong somewhere else?
 
 inline tile_chunk* 
 GetTileChunk(tile_map* TileMap, uint32 TileMapX, uint32 TileMapY, uint32 TileMapZ)
@@ -107,11 +109,17 @@ GetTileValue(tile_map* TileMap, uint32 AbsTileX, uint32 AbsTileY, uint32 AbsTile
     return TileChunkValue;
 }
 
+internal uint32
+GetTileValue(tile_map* TileMap, tile_map_position Position)
+{
+    return GetTileValue(TileMap, Position.AbsTileX, Position.AbsTileY, Position.AbsTileZ);
+}
+
 internal bool32 
 IsTileMapPointEmpty(tile_map* TileMap, tile_map_position CanPos)
 {
     uint32 TileChunkValue = GetTileValue(TileMap, CanPos.AbsTileX, CanPos.AbsTileY, CanPos.AbsTileZ);
-    bool32 Empty = (TileChunkValue == 1);
+    bool32 Empty = (TileChunkValue == 1) || (TileChunkValue == 3) || (TileChunkValue == 4);
 
     return Empty;
 }
@@ -133,4 +141,11 @@ SetTileValue(memory_arena* Arena, tile_map* TileMap, uint32 AbsTileX, uint32 Abs
         }
     }
     SetTileValue(TileMap, TileChunk, ChunkPos.RelTileX, ChunkPos.RelTileY, TileValue);
+}
+
+internal bool32
+AreOnSameTile(tile_map_position* A, tile_map_position* B)
+{
+    bool32 Result = (A->AbsTileX == B->AbsTileX) && (A->AbsTileY == B->AbsTileY) && (A->AbsTileZ == B->AbsTileZ);
+    return Result;
 }
